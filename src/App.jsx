@@ -4,6 +4,7 @@ import ActionForm from "./components/ActionForm";
 import ActionTable from "./components/ActionTable";
 import CreateActionButton from "./components/CreateActionButton";
 import { useState, useEffect } from "react";
+import toast, { Toaster } from "react-hot-toast";
 
 function App() {
   const [actions, setActions] = useState([]);
