@@ -1,20 +1,3 @@
-.create-action-btn {
-  padding: 16px;
-  font-size: 16px;
-  border: none;
-  border-radius: 8px;
-  background: #4CAF50;
-  font-weight: 600;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.create-action-btn:hover {
-  background: #277a2a;
-  transform: translate(2px); 
-}
-
 .form-group {
   display: flex;
   flex-direction: column;

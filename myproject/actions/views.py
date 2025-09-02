@@ -62,7 +62,7 @@ def add_action(request):
     )
 
 def update_action(request, action_id):
-    s = ActionSerializer(request.data)
+    s = ActionSerializer(data=request.data)
     if not s.is_valid():
         return Response(
             {

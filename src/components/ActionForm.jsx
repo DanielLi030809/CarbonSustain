@@ -1,13 +1,13 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState } from "react";
+import toast from "react-hot-toast"
 
 const actionSchema = z.object({
   action: z
     .string()
     .min(3, "Action description must have at least 3 characters")
-    .max(500, "Action description must be less than 500 characters"),
+    .max(255, "Action description must be less than 255 characters"),
   date: z
     .string()
     .min(1, "Date is required")
@@ -29,7 +29,9 @@ const actionSchema = z.object({
     .max(1000, "Points can not exceed 1000"),
 });
 
-export default function ActionForm({ onClose, onSubmit }) {
+export default function ActionForm({ setShowForm, setActions, editingAction }) {
+  const isEditing = editingAction !== null;
+
   const {
     register,
     handleSubmit,
@@ -37,25 +39,77 @@ export default function ActionForm({ onClose, onSubmit }) {
   } = useForm({
     resolver: zodResolver(actionSchema),
     defaultValues: {
-      action: "",
-      date: "",
-      points: "",
+      action: editingAction?.action || "",
+      date: editingAction?.date || "",
+      points: editingAction?.points || "",
     },
   });
 
-  const onFormSubmit = (data) => {
-    const formattedData = {
-      ...data,
-      points: Number(data.points),
-    };
-    onSubmit(formattedData);
-  };
+  async function handleFormSubmit(formData) {
+    try {
+      if (isEditing) {
+        const response = await fetch(`http://127.0.0.1:8000/api/actions/${editingAction.id}/`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: formData.action,
+            date: formData.date,
+            points: parseInt(formData.points),
+          }),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to update action");
+        }
+        const data = await response.json();
+        console.log("Action updated:", data);
+        toast.success("Action updated successfully!", {
+          icon: "🌱",
+        });
+      } else {
+        const response = await fetch("http://127.0.0.1:8000/api/actions/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: formData.action,
+            date: formData.date,
+            points: parseInt(formData.points),
+          }),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to create new action");
+        }
+        const data = await response.json();
+        console.log("Action created:", data);
+        toast.success("Action created successfully!", {
+          icon: "🌱",
+        });
+      }
+
+      const updatedResponse = await fetch(
+        "http://127.0.0.1:8000/api/actions/",
+        {
+          method: "GET",
+        }
+      );
+      const updatedData = await updatedResponse.json();
+      setActions(updatedData.fetched_actions);
+      setShowForm(false);
+    } catch (err) {
+      toast.error(err.message, {
+        icon: "❌",
+      });
+    }
+  }
 
   return (
-    <div className="dim-background" onClick={onClose}>
+    <div className="dim-background" onClick={() => {setShowForm(false)}}>
       <div className="action-form" onClick={(e) => e.stopPropagation()}>
-        <h2>Add New Action</h2>
-        <form onSubmit={handleSubmit(onFormSubmit)}>
+        <h2>{isEditing ? "Edit Action" : "Add New Action"}</h2>
+        <form onSubmit={handleSubmit(handleFormSubmit)}>
           <div className="form-group">
             <label htmlFor="action">Action Description</label>
             <input
@@ -91,10 +145,10 @@ export default function ActionForm({ onClose, onSubmit }) {
           </div>
           <div className="button-group">
             <button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "💾 Save Action"}
+              {isSubmitting ? "Saving..." : isEditing ? "Update Action" : "Save Action"}
             </button>
-            <button type="button" onClick={onClose} disabled={isSubmitting}>
-              ❌ Cancel
+            <button type="button" onClick={() => setShowForm(false)} disabled={isSubmitting}>
+              Cancel
             </button>
           </div>
         </form>

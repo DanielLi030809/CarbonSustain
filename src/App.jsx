@@ -1,62 +1,21 @@
 import "./ActionForm.css";
 import "./main.css";
+import "./ActionTable.css";
 import ActionForm from "./components/ActionForm";
 import ActionTable from "./components/ActionTable";
-import CreateActionButton from "./components/CreateActionButton";
 import { useState, useEffect } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const [actions, setActions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [editingAction, setEditingAction] = useState(null);
 
-  function handleOpenForm() {
+  function handleClick() {
     setShowForm(true);
-  }
-
-  function handleCloseForm() {
-    setShowForm(false);
-  }
-
-  async function handleFormSubmit(formData) {
-    try {
-      setSubmitting(true);
-      const response = await fetch("http://127.0.0.1:8000/api/actions/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: formData.action,
-          date: formData.date,
-          points: parseInt(formData.points),
-        }),
-      });
-      console.log("response", response);
-      if (!response.ok) {
-        throw new Error("Failed to create new action");
-      }
-      const data = await response.json();
-      console.log("Action created:", data);
-
-      const updatedResponse = await fetch(
-        "http://127.0.0.1:8000/api/actions/",
-        {
-          method: "GET",
-        }
-      );
-      const updatedData = await updatedResponse.json();
-      setActions(updatedData.fetched_actions);
-      setShowForm(false);
-      alert("Action created successfully!");
-    } catch (err) {
-      alert("Error creating action: " + err.message);
-    } finally {
-      setSubmitting(false);
-    }
+    setEditingAction(null);
   }
 
   useEffect(() => {
@@ -86,13 +45,52 @@ function App() {
 
   return (
     <>
-      <CreateActionButton onOpenForm={handleOpenForm}></CreateActionButton>
-      <ActionTable actions={actions}></ActionTable>
+      <header className="app-header">
+        <h1 className="app-title">
+          <span className="brand-icon">🌱</span>
+          CarbonSustain
+          <span className="subtitle">Sustainability Actions Tracker</span>
+        </h1>
+      </header>
+      <div className="create-action-btn-container">
+        <button className="create-action-btn" onClick={handleClick}>
+          Add New Action
+        </button>
+      </div>
+      <ActionTable
+        setEditingAction={setEditingAction}
+        setShowForm={setShowForm}
+        actions={actions}
+        setActions={setActions}></ActionTable>
       {showForm && (
         <ActionForm
-          onClose={handleCloseForm}
-          onSubmit={handleFormSubmit}></ActionForm>
+          setShowForm={setShowForm}
+          setActions={setActions}
+          editingAction={editingAction}></ActionForm>
       )}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: "#363636",
+            color: "#fff",
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: "#4CAF50",
+              secondary: "#fff",
+            },
+          },
+          error: {
+            duration: 5000,
+            iconTheme: {
+              primary: "#f44336",
+              secondary: "#fff",
+            },
+          },
+        }}></Toaster>
     </>
   );
 }
