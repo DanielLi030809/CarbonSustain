@@ -23,6 +23,9 @@ myproject/.env
 *.pyc
 __pycache__/
 
+# Data files (keep local, don't commit)
+myproject/data.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
