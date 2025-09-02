@@ -1,6 +1,12 @@
-import toast from "react-hot-toast"
+import toast from "react-hot-toast";
+import { actionsAPI } from "../api/actions";
 
-export default function ActionTable({ setEditingAction, setShowForm, actions, setActions}) {
+export default function ActionTable({
+  setEditingAction,
+  setShowForm,
+  actions,
+  setActions,
+}) {
   if (!actions || actions.length == 0) {
     return (
       <div className="empty-state">
@@ -21,31 +27,28 @@ export default function ActionTable({ setEditingAction, setShowForm, actions, se
       return;
     }
 
-    const loadingToast = toast.loading("Deleting action...")
+    const loadingToast = toast.loading("Deleting action...");
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/actions/${actionId}/`, {
-        method: "DELETE",
-      })
+      await actionsAPI.delete(actionId);
 
-      if (!response.ok) {
-        throw new Error("Unable to delete action")
-      }
-      toast.success("Action deleted successfully", {
+      // Refresh actions list
+      const response = await actionsAPI.getAll();
+      setActions(response.data.fetched_actions);
+
+      toast.success("Action deleted successfully!", {
         id: loadingToast,
-        icon: "🗑️"
-      })
-
-      const updatedResponse = await fetch('http://127.0.0.1:8000/api/actions/', {
-        method: "GET",
-      })
-      const updatedData = await updatedResponse.json();
-      setActions(updatedData.fetched_actions);
+        icon: "🗑️",
+      });
     } catch (err) {
-      toast.error("Error deleting action", {
-        id: loadingToast,
-        icon: "❌",
-      })
+      toast.error(
+        "Error deleting action: " +
+          (err.response?.data?.message || err.message),
+        {
+          id: loadingToast,
+          icon: "❌",
+        }
+      );
     }
   }
 
@@ -76,8 +79,14 @@ export default function ActionTable({ setEditingAction, setShowForm, actions, se
               <span className="action-points">{action.points}</span>
             </td>
             <td className="options-btn-group">
-              <button className="edit-btn" onClick={() => handleEdit(action)} title="Edit action"></button>
-              <button className="delete-btn" onClick={() => handleDelete(action.id)} title="Delete action"></button>
+              <button
+                className="edit-btn"
+                onClick={() => handleEdit(action)}
+                title="Edit action"></button>
+              <button
+                className="delete-btn"
+                onClick={() => handleDelete(action.id)}
+                title="Delete action"></button>
             </td>
           </tr>
         ))}

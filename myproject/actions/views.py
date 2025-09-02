@@ -39,9 +39,6 @@ def add_action(request):
     try:
         new_action = dict(s.validated_data)  # Convert to mutable dict
         new_action["id"] = str(uuid.uuid4())
-        # Convert date object to string for JSON serialization
-        #if 'date' in new_action and hasattr(new_action['date'], 'isoformat'):
-        #    new_action['date'] = new_action['date'].isoformat()
         actions = load_data()
         actions.append(new_action)
         safe_write(actions)

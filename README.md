@@ -22,16 +22,20 @@ A modern, full-stack web application for tracking and managing personal sustaina
 
 ### 🔧 Technical Features
 - **RESTful API**: Well-structured Django REST Framework backend
+- **HTTP Client**: Axios-powered API calls with automatic error handling and interceptors
 - **JSON Database**: File-based data storage with atomic write operations
-- **Error Handling**: Comprehensive error handling on both frontend and backend
+- **Error Handling**: Comprehensive error handling with detailed server response integration
 - **Environment Configuration**: Secure configuration with environment variables
 - **CORS Support**: Proper cross-origin resource sharing setup
+- **Request/Response Logging**: Automatic API call logging for debugging
 
 ## 🏗️ Architecture
 
 ### Frontend (React + Vite)
 ```
 src/
+├── api/
+│   └── actions.js             # Axios configuration and API methods
 ├── components/
 │   ├── ActionForm.jsx          # Form for creating/editing actions
 │   ├── ActionTable.jsx         # Table displaying all actions
@@ -77,7 +81,7 @@ myproject/
 
 2. **Set up the frontend**
    ```bash
-   # Install dependencies
+   # Install dependencies (includes Axios for API calls)
    npm install
    
    # Start development server
@@ -96,9 +100,16 @@ myproject/
    # Install dependencies
    pip install django djangorestframework django-cors-headers
    
-   # Create environment file
-   echo "DJANGO_SECRET_KEY=your-secret-key-here" > .env
+   # Generate a Django secret key
+   SECRET_KEY=$(python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())")
+   
+   # Create environment file with generated secret key
+   echo "DJANGO_SECRET_KEY=$SECRET_KEY" > .env
    echo "DEBUG=True" >> .env
+   
+   # Alternative: Generate secret key manually (if above doesn't work)
+   # python -c "from django.core.management.utils import get_random_secret_key; print('DJANGO_SECRET_KEY=' + get_random_secret_key())" > .env
+   # echo "DEBUG=True" >> .env
    
    # Run migrations (if needed)
    python manage.py migrate
@@ -112,13 +123,52 @@ myproject/
 Create a `.env` file in the `myproject/` directory:
 
 ```env
-DJANGO_SECRET_KEY=your-super-secret-key-here
+DJANGO_SECRET_KEY=your-generated-secret-key-here
 DEBUG=True
 ```
 
-## 📡 API Endpoints
+### 🔐 Django Secret Key Generation
 
-### Actions API
+If you need to generate a secret key manually, use one of these methods:
+
+**Method 1: Using Django utility (Recommended)**
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+**Method 2: Using Python secrets**
+```bash
+python -c "import secrets; print(''.join(secrets.choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for _ in range(50)))"
+```
+
+**Method 3: Online generator**
+Visit [djecrety.ir](https://djecrety.ir/) for a Django-compatible secret key generator.
+
+> **⚠️ Security Note**: Never commit your `.env` file to version control. Each developer should generate their own unique secret key.
+
+## 📡 API Integration
+
+### Axios Configuration
+The frontend uses Axios for all HTTP requests with centralized configuration:
+
+```javascript
+// src/api/actions.js
+const api = axios.create({
+  baseURL: 'http://127.0.0.1:8000/api',
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 10000,
+});
+
+// Available methods
+export const actionsAPI = {
+  getAll: () => api.get('/actions/'),
+  create: (actionData) => api.post('/actions/', actionData),
+  update: (actionId, actionData) => api.put(`/actions/${actionId}/`, actionData),
+  delete: (actionId) => api.delete(`/actions/${actionId}/`),
+};
+```
+
+### API Endpoints
 - **GET** `/api/actions/` - Retrieve all actions
 - **POST** `/api/actions/` - Create a new action
 - **PUT** `/api/actions/{id}/` - Update an existing action
@@ -133,6 +183,12 @@ DEBUG=True
   "id": "uuid-string"
 }
 ```
+
+### Error Handling
+Axios automatically handles HTTP errors and provides detailed error information:
+- **4xx errors**: Client-side validation issues
+- **5xx errors**: Server-side processing errors
+- **Network errors**: Connection timeouts and failures
 
 ## 🎨 Styling & Design
 
@@ -160,6 +216,9 @@ npm run build
 
 # Preview production build
 npm run preview
+
+# View API request logs in browser console
+# All Axios requests are automatically logged for debugging
 ```
 
 ### Backend Development
@@ -181,6 +240,7 @@ python manage.py runserver 8001
 ### Frontend
 - **React**: UI library
 - **Vite**: Build tool and development server
+- **Axios**: HTTP client for API requests
 - **React Hook Form**: Form management
 - **Zod**: Schema validation
 - **React Hot Toast**: Notification system
@@ -201,8 +261,9 @@ python manage.py runserver 8001
 
 ### Frontend
 - Form validation with inline error messages
-- Network error handling with user-friendly messages
-- Loading states and error boundaries
+- Axios-powered error handling with server response integration
+- Loading states with toast notifications and error boundaries
+- Automatic request/response logging for debugging
 
 ### Backend
 - Comprehensive exception handling

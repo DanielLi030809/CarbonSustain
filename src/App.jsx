@@ -5,6 +5,7 @@ import ActionForm from "./components/ActionForm";
 import ActionTable from "./components/ActionTable";
 import { useState, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
+import { actionsAPI } from "./api/actions";
 
 function App() {
   const [actions, setActions] = useState([]);
@@ -22,16 +23,10 @@ function App() {
     async function fetchActions() {
       try {
         setLoading(true);
-        const response = await fetch("http://127.0.0.1:8000/api/actions", {
-          method: "GET",
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch actions");
-        }
-        const data = await response.json();
-        setActions(data.fetched_actions);
+        const response = await actionsAPI.getAll();
+        setActions(response.data.fetched_actions);
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.message || err.message);
       } finally {
         setLoading(false);
       }
