@@ -7,7 +7,22 @@ from .serializer import ActionSerializer
 import uuid
 
 
+@api_view(['PUT', 'DELETE'])
+def update_or_delete_actions(request, action_id):
+    if request.method == 'PUT':
+        return update_action(request, action_id)
+    elif request.method == 'DELETE':
+        return delete_action(action_id)
+    
+@api_view(['GET', 'POST'])
+def get_or_add_actions(request):
+    if request.method == 'GET':
+        return get_actions()
+    elif request.method == 'POST':
+        return add_action(request)
+
 def get_actions():
+    """Fetch all actions from the json file"""
     try:
         actions = load_data()
     except Exception as e:
@@ -27,6 +42,7 @@ def get_actions():
     )
 
 def add_action(request):
+    """Add an action to the json file"""
     s = ActionSerializer(data=request.data)
     if not s.is_valid():
         return Response(
@@ -59,6 +75,7 @@ def add_action(request):
     )
 
 def update_action(request, action_id):
+    """Update the action with the action id"""
     s = ActionSerializer(data=request.data)
     if not s.is_valid():
         return Response(
@@ -104,6 +121,7 @@ def update_action(request, action_id):
     )
 
 def delete_action(action_id):
+    """Delete the action with the action id from the json file"""
     try:
         target_id = action_id
         actions = load_data()
@@ -137,21 +155,6 @@ def delete_action(action_id):
         },
         status=status.HTTP_200_OK
     )
-
-
-@api_view(['PUT', 'DELETE'])
-def update_or_delete_actions(request, action_id):
-    if request.method == 'PUT':
-        return update_action(request, action_id)
-    elif request.method == 'DELETE':
-        return delete_action(action_id)
-    
-@api_view(['GET', 'POST'])
-def get_or_add_actions(request):
-    if request.method == 'GET':
-        return get_actions()
-    elif request.method == 'POST':
-        return add_action(request)
 
 
                 
