@@ -36,14 +36,16 @@ A modern, full-stack web application for tracking and managing personal sustaina
 src/
 ├── api/
 │   └── actions.js             # Axios configuration and API methods
+├── assets/
+│   └── react.svg              # React logo asset
 ├── components/
 │   ├── ActionForm.jsx          # Form for creating/editing actions
 │   ├── ActionTable.jsx         # Table displaying all actions
-│   └── ConfirmModal.jsx        # Confirmation dialog component
-├── styles/
-│   ├── ActionForm.css          # Form and modal styling
-│   ├── ActionTable.css         # Table and button styling
-│   └── main.css               # Global styles and header
+│   ├── DeleteActionButton.jsx  # Delete button component
+│   └── UpdateActionButton.jsx  # Update button component
+├── ActionForm.css             # Form and modal styling
+├── ActionTable.css            # Table and button styling
+├── main.css                   # Global styles and header
 ├── App.jsx                     # Main application component
 └── main.jsx                   # Application entry point
 ```
@@ -52,15 +54,26 @@ src/
 ```
 myproject/
 ├── actions/
-│   ├── views.py               # API endpoints for CRUD operations
+│   ├── __init__.py            # Python package marker
+│   ├── admin.py               # Django admin configuration
+│   ├── apps.py                # App configuration
+│   ├── jsondb.py              # JSON file database utilities
+│   ├── migrations/            # Database migration files
+│   │   └── __init__.py
 │   ├── models.py              # Data models (currently file-based)
-│   ├── serializers.py         # Data serialization/validation
-│   ├── urls.py                # URL routing
-│   └── jsondb.py             # JSON file database utilities
+│   ├── serializer.py          # Data serialization/validation (note: singular)
+│   ├── tests.py               # Unit tests
+│   ├── urls.py                # App URL routing
+│   └── views.py               # API endpoints for CRUD operations
 ├── myproject/
-│   ├── settings.py           # Django configuration
-│   └── urls.py              # Main URL configuration
-└── data.json                # JSON database file
+│   ├── __init__.py            # Python package marker
+│   ├── asgi.py                # ASGI configuration
+│   ├── settings.py            # Django configuration
+│   ├── urls.py                # Main URL configuration
+│   └── wsgi.py                # WSGI configuration
+├── data.json                  # JSON database file (gitignored)
+├── db.sqlite3                 # SQLite database (default Django)
+└── manage.py                  # Django management script
 ```
 
 ## 🚀 Getting Started
